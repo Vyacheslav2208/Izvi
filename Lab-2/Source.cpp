@@ -7,6 +7,44 @@
 #include <math.h>
 
 char key[32] = { 28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22, 23, 16, 17, 18, 19, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3 };
+int sab = 1, bas = 0;
+void perevod(char buff[], char temp[], int j, int a, char buffOut[]) {
+	char m[4], p[2];
+	int e = 0;
+	for (int k = 0; k < 8; k++) {
+		if (k < a) {
+			p[0] = buff[k + j * 8];
+			e = atoi(&p[0]);
+		}
+		else {
+			e = 0;
+		}
+
+
+		for (int h = 3; h >= 0; h--) {
+			if (e > 0)
+			{
+				m[h] = e % 2;
+				e /= 2;
+			}
+			else
+				m[h] = 0;
+		}
+		for (int l = 0; l < 4; l++) {
+			temp[key[l + k * 4]] = m[l];
+		}
+	}
+	for (int k = 0; k < 8; k++) {
+
+		e = 0;
+		for (int h = 0; h < 4; h++) {
+
+			e += temp[k * 4 + 3 - h] * pow(2, h);
+		}
+		_itoa(e, &p[0], 10);
+		buffOut[k + j * 8] = p[0];
+	}
+}
 
 int shifrator(const char source[], const char drain[]) {
 
@@ -25,7 +63,11 @@ int shifrator(const char source[], const char drain[]) {
 		return 0;
 	}
 	char pw[] = { "12345678" };
-	fwrite(pw, 8, 1, pq);
+	for (int j = 0; j < sab; j++) {
+			if (j == sab - 1) fwrite(pw, bas, 1, pq);
+			else fwrite(pw, 10, 1, pq);
+		}
+	//fwrite(pw, 10, 1, pq);
 	fclose(pq);
 
 	if ((fp = fopen(source, "rb")) == NULL) {
@@ -54,9 +96,11 @@ int shifrator(const char source[], const char drain[]) {
 	while (fread(buff, sizeof buff, 1, fp) != 0) {
 		pos1 = ftell(fp);
 
-		/*for (int j = 0; j < 10; j++)
-			for (int r = 0; r < 10; r++)
-				buffout[r + j * 10] = buff[key[r] - 1 + j * 10];*/
+		for (int j = 0; j < 8; j++) {
+
+			perevod(buff, temp, j, 8, buffOut);
+
+		}
 
 		fwrite(buffOut, sizeof buffOut, 1, f);
 	}
@@ -67,59 +111,21 @@ int shifrator(const char source[], const char drain[]) {
 	int pos2 = ftell(fp) - pos1;;                            // получаем размер в байтах
 	fseek(fp, pos1, SEEK_SET);
 	if (pos2 != 0) {
-		int a = pos2 % 8, b = pos2 / 8, c = (b + (a == 0 ? 0 : 1)) * 8, d = b * 8 + a, e;
+		int a = pos2 % 8, b = pos2 / 8, c = (b + (a == 0 ? 0 : 1)) * 8;
 
 		fread(buff, pos2, 1, fp);
-		char m[4], p[2], * s = &p[0];
 		for (int j = 0; j < b; j++) {
-			for (int k = 0; k < 8; k++) {
-				p[0] = buff[k + j * 8];
-				e = atoi(s);
-
-
-				for (int h = 3; h >= 0 ; h--) {
-					if (e > 0)
-					{
-						m[h] = e % 2;
-						e /= 2;
-					}
-					else
-						m[h] = 0;
-				}
-				for (int l = 0; l < 4; l++) {
-					temp[key[l + k * 4]] = m[l];
-				}
-				
-			}
-			for (int k = 0; k < 8; k++) {
-				
-				e = 0;
-				for (int h = 0; h < 4; h++) {
-					
-					e += temp[k * 4 + 3 - h] * pow(2, h);
-				}
-				_itoa(e, s, 10);
-				buffOut[k + j * 8] = p[0];
-			}
+			
+			perevod(buff, temp, j,8,buffOut);
 			
 		}
-		int huy = 0;
-			/*for (int r = 0; r < 32; r++)
-				buffOut[r + j * 32] = buff[key[r] - 1 + j * 32];*/
 
+		if (a != 0) {
 
+			perevod(buff, temp, b, a,buffOut);
 
-		//if (a != 0) {
-		//	for (int r = 0; r < 32; r++) {
-		//		if (key[r] - 1 < a)
-		//			buffOut[r + b * 32] = buff[key[r] - 1 + b * 32];
-		//		else
-		//			buffOut[r + b * 32] = ' ';
-		//	}
+		}
 
-		//}
-
-		//fwrite(buffOut, c, 1, f);
 		fwrite(buffOut, c, 1, f);
 
 		//---------------------------------------------------------------
@@ -245,10 +251,14 @@ int deshifrator(const char source[], const char drain[]) {
 }
 
 int main(int argc, char* argv[]) {
-
+	a1:
+	sab += 1;
+	//sab=11;
+	bas = rand() % 9;
 		shifrator("db1.txt", "db2.txt");
 
 	_getch();
+	goto a1;
 	return 0;
 }
 
