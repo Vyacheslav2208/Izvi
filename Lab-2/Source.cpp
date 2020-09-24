@@ -4,14 +4,15 @@
 #include <Windows.h>
 #include <locale.h>
 #include <time.h>
+#include <math.h>
 
-char key[10] = { 2, 8, 10, 4, 3, 7, 1, 6, 9, 5 };
+char key[32] = { 28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22, 23, 16, 17, 18, 19, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3 };
 
 int shifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * f;
 
-	char buff[256], buffOut[256];
+	char buff[80], buffOut[80], temp[32];
 
 	srand(time(NULL));
 
@@ -42,7 +43,7 @@ int shifrator(const char source[], const char drain[]) {
 	//for (int j = 0; j < 32; j++)
 		//buffOut[j] = ' ';
 	strncpy(buffOut, " " , 8);
-	strncpy(buff, "" , 256);
+	strncpy(buff, "" , 80);
 	fwrite(buffOut, 8, 1, f);
 
 
@@ -66,13 +67,45 @@ int shifrator(const char source[], const char drain[]) {
 	int pos2 = ftell(fp) - pos1;;                            // получаем размер в байтах
 	fseek(fp, pos1, SEEK_SET);
 	if (pos2 != 0) {
-		int a = pos2 % 8, b = pos2 / 8, c = (b + (a == 0 ? 0 : 1)) * 8, d = b * 8 + a;
+		int a = pos2 % 8, b = pos2 / 8, c = (b + (a == 0 ? 0 : 1)) * 8, d = b * 8 + a, e;
 
 		fread(buff, pos2, 1, fp);
+		char m[4], p[2], * s = &p[0];
+		for (int j = 0; j < b; j++) {
+			for (int k = 0; k < 8; k++) {
+				p[0] = buff[k + j * 8];
+				e = atoi(s);
 
-		//for (int j = 0; j < b; j++)
-		//	for (int r = 0; r < 32; r++)
-		//		//buffOut[r + j * 32] = buff[key[r] - 1 + j * 32];
+
+				for (int h = 3; h >= 0 ; h--) {
+					if (e > 0)
+					{
+						m[h] = e % 2;
+						e /= 2;
+					}
+					else
+						m[h] = 0;
+				}
+				for (int l = 0; l < 4; l++) {
+					temp[key[l + k * 4]] = m[l];
+				}
+				
+			}
+			for (int k = 0; k < 8; k++) {
+				
+				e = 0;
+				for (int h = 0; h < 4; h++) {
+					
+					e += temp[k * 4 + 3 - h] * pow(2, h);
+				}
+				_itoa(e, s, 10);
+				buffOut[k + j * 8] = p[0];
+			}
+			
+		}
+		int huy = 0;
+			/*for (int r = 0; r < 32; r++)
+				buffOut[r + j * 32] = buff[key[r] - 1 + j * 32];*/
 
 
 
@@ -87,7 +120,7 @@ int shifrator(const char source[], const char drain[]) {
 		//}
 
 		//fwrite(buffOut, c, 1, f);
-		fwrite(buff, c, 1, f);
+		fwrite(buffOut, c, 1, f);
 
 		//---------------------------------------------------------------
 
