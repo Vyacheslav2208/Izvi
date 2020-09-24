@@ -11,12 +11,21 @@ int shifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * f;
 
-	char buff[100], buffOut[100];
+	char buff[256], buffOut[256];
 
 	srand(time(NULL));
 
 	//---------------------------------------------------------------
 	// открытие для чтения 
+
+	FILE* pq;
+	if ((pq = fopen(source, "wb")) == NULL) {
+		printf("Cannot open file.");
+		return 0;
+	}
+	char pw[] = { "12345678" };
+	fwrite(pw, 8, 1, pq);
+	fclose(pq);
 
 	if ((fp = fopen(source, "rb")) == NULL) {
 		printf("cannot open file");
@@ -28,12 +37,13 @@ int shifrator(const char source[], const char drain[]) {
 		return 1;
 	}
 
-	//---------------------------------------------------------------
+	////---------------------------------------------------------------
 
-	for (int j = 0; j < 10; j++)
-		buffOut[j] = ' ';
-
-	fwrite(buffOut, 10, 1, f);
+	//for (int j = 0; j < 32; j++)
+		//buffOut[j] = ' ';
+	strncpy(buffOut, " " , 8);
+	strncpy(buff, "" , 256);
+	fwrite(buffOut, 8, 1, f);
 
 
 	//---------------------------------------------------------------
@@ -43,9 +53,9 @@ int shifrator(const char source[], const char drain[]) {
 	while (fread(buff, sizeof buff, 1, fp) != 0) {
 		pos1 = ftell(fp);
 
-		for (int j = 0; j < 10; j++)
+		/*for (int j = 0; j < 10; j++)
 			for (int r = 0; r < 10; r++)
-				buffOut[r + j * 10] = buff[key[r] - 1 + j * 10];
+				buffout[r + j * 10] = buff[key[r] - 1 + j * 10];*/
 
 		fwrite(buffOut, sizeof buffOut, 1, f);
 	}
@@ -56,32 +66,33 @@ int shifrator(const char source[], const char drain[]) {
 	int pos2 = ftell(fp) - pos1;;                            // получаем размер в байтах
 	fseek(fp, pos1, SEEK_SET);
 	if (pos2 != 0) {
-		int a = pos2 % 10, b = pos2 / 10, c = (b + (a == 0 ? 0 : 1)) * 10, d = b * 10 + a;
+		int a = pos2 % 8, b = pos2 / 8, c = (b + (a == 0 ? 0 : 1)) * 8, d = b * 8 + a;
 
 		fread(buff, pos2, 1, fp);
 
-		for (int j = 0; j < b; j++)
-			for (int r = 0; r < 10; r++)
-				buffOut[r + j * 10] = buff[key[r] - 1 + j * 10];
+		//for (int j = 0; j < b; j++)
+		//	for (int r = 0; r < 32; r++)
+		//		//buffOut[r + j * 32] = buff[key[r] - 1 + j * 32];
 
 
 
-		if (a != 0) {
-			for (int r = 0; r < 10; r++) {
-				if (key[r] - 1 < a)
-					buffOut[r + b * 10] = buff[key[r] - 1 + b * 10];
-				else
-					buffOut[r + b * 10] = ' ';
-			}
+		//if (a != 0) {
+		//	for (int r = 0; r < 32; r++) {
+		//		if (key[r] - 1 < a)
+		//			buffOut[r + b * 32] = buff[key[r] - 1 + b * 32];
+		//		else
+		//			buffOut[r + b * 32] = ' ';
+		//	}
 
-		}
+		//}
 
-		fwrite(buffOut, c, 1, f);
+		//fwrite(buffOut, c, 1, f);
+		fwrite(buff, c, 1, f);
 
 		//---------------------------------------------------------------
 
 		for (char i = 0; i < a;) {
-			buffOut[i] = buff[(rand() % 9) + (rand() % 9) * 10] + rand() % 9 + 1;
+			buffOut[i] = buff[(rand() % 9) + (rand() % 9) * 8] + rand() % 9 + 1;
 
 			if (buffOut[i] != ' ')
 				i++;
@@ -101,6 +112,7 @@ int shifrator(const char source[], const char drain[]) {
 	printf("\n\nИсходный текст: %d", ftell(fp));
 	printf("\nЗашифрованный текст: %d", ftell(f));
 
+	
 
 	fclose(fp);
 	fclose(f);
@@ -201,13 +213,7 @@ int deshifrator(const char source[], const char drain[]) {
 
 int main(int argc, char* argv[]) {
 
-	int d = atoi(argv[1]);
-	if (d == 0) {
-		shifrator(argv[2], argv[3]);
-	}
-	else if (d == 1) {
-		deshifrator(argv[2], argv[3]);
-	}
+		shifrator("db1.txt", "db2.txt");
 
 	_getch();
 	return 0;
