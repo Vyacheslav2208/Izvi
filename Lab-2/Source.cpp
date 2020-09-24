@@ -8,8 +8,8 @@
 
 char key[32] = { 28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22, 23, 16, 17, 18, 19, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3 };
 int sab = 1, bas = 0;
-void perevod(char buff[], char temp[], int j, int a, char buffOut[]) {
-	char m[4], p[2];
+void perevod(char buff[], int j, int a, char buffOut[]) {
+	char m[4], p[2], temp[32];
 	int e = 0;
 	for (int k = 0; k < 8; k++) {
 		if (k < a) {
@@ -46,6 +46,48 @@ void perevod(char buff[], char temp[], int j, int a, char buffOut[]) {
 	}
 }
 
+void perevod2(char buff[], int b ,char buffOut[]) {
+	char m[4], p[2], temp[32];
+	int e = 0, ku;
+	for (int j = 0; j < b; j++) {
+			for (int k = 0; k < 8; k++) {
+
+			
+
+
+				p[0] = buff[k + j * 8];
+				e = atoi(&p[0]);
+
+
+				for (int h = 3; h >= 0; h--) {
+					if (e > 0)
+					{
+						m[h] = e % 2;
+						e /= 2;
+					}
+					else
+						m[h] = 0;
+
+				}
+				for (int l = 0; l < 4; l++) {
+					ku = key[l + k * 4];
+					temp[key[l + k * 4]] = m[l];
+				}
+			}
+			for (int k = 0; k < 8; k++) {
+
+				e = 0;
+				for (int h = 0; h < 4; h++) {
+
+					e += temp[k * 4 + 3 - h] * pow(2, h);
+				}
+				_itoa(e, &p[0], 10);
+				buffOut[k + j * 8] = p[0];
+			}
+		
+	}
+}
+
 int shifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * f;
@@ -65,7 +107,7 @@ int shifrator(const char source[], const char drain[]) {
 	char pw[] = { "12345678" };
 	for (int j = 0; j < sab; j++) {
 			if (j == sab - 1) fwrite(pw, bas, 1, pq);
-			else fwrite(pw, 10, 1, pq);
+			else fwrite(pw, 8, 1, pq);
 		}
 	//fwrite(pw, 10, 1, pq);
 	fclose(pq);
@@ -98,7 +140,7 @@ int shifrator(const char source[], const char drain[]) {
 
 		for (int j = 0; j < 8; j++) {
 
-			perevod(buff, temp, j, 8, buffOut);
+			perevod(buff, j, 8, buffOut);
 
 		}
 
@@ -116,13 +158,13 @@ int shifrator(const char source[], const char drain[]) {
 		fread(buff, pos2, 1, fp);
 		for (int j = 0; j < b; j++) {
 			
-			perevod(buff, temp, j,8,buffOut);
+			perevod(buff, j,8,buffOut);
 			
 		}
 
 		if (a != 0) {
 
-			perevod(buff, temp, b, a,buffOut);
+			perevod(buff, b, a,buffOut);
 
 		}
 
@@ -131,7 +173,7 @@ int shifrator(const char source[], const char drain[]) {
 		//---------------------------------------------------------------
 
 		for (char i = 0; i < a;) {
-			buffOut[i] = buff[(rand() % 9) + (rand() % 9) * 8] + rand() % 9 + 1;
+			buffOut[i] =  rand() % 60 + 30;
 
 			if (buffOut[i] != ' ')
 				i++;
@@ -163,7 +205,7 @@ int deshifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * deshif;
 
-	char buff[100], buffOut[100];
+	char buff[80], buffOut[80], temp[32];
 	char plicity = 0;
 
 	//---------------------------------------------------------------
@@ -180,22 +222,25 @@ int deshifrator(const char source[], const char drain[]) {
 
 	//---------------------------------------------------------------
 
-	fread(buffOut, 10, 1, fp);
-
-	while (plicity < 10 && buffOut[plicity] != ' ') {
+	fread(buffOut, 8, 1, fp);
+	strncpy(buff, "", 80);
+	while (plicity < 8 && buffOut[plicity] != '\0' && buffOut[plicity] != ' ') {
 		plicity++;
 	}
 
 	//---------------------------------------------------------------
-
+	char m[4], p[2];
+	int e = 0, cu;
 	int pos1 = ftell(fp);
 	while (fread(buff, sizeof buff, 1, fp) != 0) {
 		pos1 = ftell(fp);
+		perevod2(buff, 10, buffOut);
 
-		for (int j = 0; j < 10; j++)
+
+		/*for (int j = 0; j < 10; j++)
 			for (int r = 0; r < 10; r++)
 				buffOut[key[r] - 1 + j * 10] = buff[r + j * 10];
-
+				*/
 		fseek(fp, 0, SEEK_END);
 		if (ftell(fp) - pos1 > 0)
 			fwrite(buffOut, sizeof buffOut, 1, deshif);
@@ -213,26 +258,26 @@ int deshifrator(const char source[], const char drain[]) {
 
 	if (pos2 == 0) {
 		if (plicity != 0) {
-			pos2 = 90 + plicity;
-			fseek(deshif, pos1 - 110, SEEK_SET);
+			pos2 = 72 + plicity;
+			fseek(deshif, pos1 - 88, SEEK_SET);
 		}
 		else
-			pos2 = 100;
+			pos2 = 72;
 
 		fwrite(buffOut, pos2, 1, deshif);
 	}
-	else if (pos2 == 10 && plicity != 0) {
+	else if (pos2 == 8 && plicity != 0) {
 
-		pos2 = pos2 + plicity - 10;
+		pos2 = pos2 + plicity - 8;
 		fwrite(buffOut, pos2, 1, deshif);
 
 	}
 	else if (pos2 != 0) {
-
+		perevod2(buff, pos2/8, buffOut);
 		if (plicity != 0)
-			pos2 = pos2 - 10 + plicity;
-
-		fwrite(buff, pos2, 1, deshif);
+			pos2 = pos2 - 8 + plicity;
+		
+		fwrite(buffOut, pos2, 1, deshif);
 	}
 
 	//---------------------------------------------------------------
@@ -251,12 +296,16 @@ int deshifrator(const char source[], const char drain[]) {
 }
 
 int main(int argc, char* argv[]) {
+	srand(time(NULL));
 	a1:
 	sab += 1;
-	//sab=11;
+	//sab=4;
 	bas = rand() % 9;
-		shifrator("db1.txt", "db2.txt");
+	//bas = 8;
 
+		shifrator("db1.txt", "db2.txt");
+		deshifrator("db2.txt", "db3.txt");
+		system("fc db1.txt db3.txt");
 	_getch();
 	goto a1;
 	return 0;
