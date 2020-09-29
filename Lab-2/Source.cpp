@@ -6,11 +6,20 @@
 #include <time.h>
 #include <math.h>
 
+int pow2to16(int h) {
+	int e = 1;
+
+	for (int i = 0; i < h; i++) {
+		e = e + i * 16;
+	}
+	return e;
+}
+
 //char key[32] = { 28, 29, 30, 31, 24, 25, 26, 27, 20, 21, 22, 23, 16, 17, 18, 19, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3 };
 char key[32] = { 24, 25, 26, 27, 28, 29, 30, 31,  16, 17, 18, 19, 20, 21, 22, 23,  8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 };
 int sab = 1, bas = 0;
-void perevod(char buff[], int j, int a, char buffOut[]) {
-	char m[8], p[2], temp[32];
+void perevod(char buff[], int j, int a,  char buffOut[]) {
+	unsigned char m[8], p[2], temp[32];
 	int e = 0;
 	for (int k = 0; k < 4; k++) {
 		if (k < a) {
@@ -34,14 +43,15 @@ void perevod(char buff[], int j, int a, char buffOut[]) {
 				m[h] = 0;
 		}
 		for (int l = 0; l < 8; l++) {
-			temp[key[l + k * 8]] = m[l];
+			//temp[key[l + k * 8]] = m[l];
+			temp[l + k * 8] = m[l];
 			//temp[l + k * 8] = m[l];
 		}
 	}
 	for (int k = 0; k < 4; k++) {
 
 		e = 0;
-		for (int h = 0; h < 7; h++) {
+		for (int h = 0; h < 8; h++) {
 
 			e += (temp[k * 8 + 7 - h]) * pow(2, h);
 		}
@@ -51,60 +61,53 @@ void perevod(char buff[], int j, int a, char buffOut[]) {
 	}
 }
 
-void perevod2(char buff[], int b ,char buffOut[]) {
-	char m[8], p[2], temp[32];
-	int e = 0, ku;
-	for (int j = 0; j < b; j++) {
-			for (int k = 0; k < 4; k++) {
+void perevod2(char buff[], int j,  int b, char buffOut[]) {
+	unsigned char m[8], p[2], temp[32];
+	int e = 0;
 
-			
+	//for (int j = 0; j < b; j++) {
+		for (int k = 0; k < 4; k++) {
+
+			p[0] = buff[k + j * 4];
+			e = p[0];
 
 
-				p[0] = buff[k + j * 4];
-				//e = atoi(&p[0]);
-				e = p[0];
-
-				for (int h = 7; h >= 0; h--) {
-					if (e > 0)
-					{
-						m[h] = e % 2;
-						e /= 2;
-					}
-					else
-						m[h] = 0;
-
+			for (int h = 7; h >= 0; h--) {
+				if (e > 0)
+				{
+					m[h] = e % 2;
+					//m[h] = e % 2;
+					e /= 2;
 				}
-				for (int l = 0; l < 8; l++) {
-
-					temp[key[l + k * 8]] = m[l];
-				}
+				else
+					m[h] = 0;
 			}
-			for (int k = 0; k < 4; k++) {
+			for (int l = 0; l < 8; l++) {
 
-				e = 0;
-				for (int h = 0; h < 8; h++) {
-
-					e += temp[k * 8 + 7 - h] * pow(2, h);
-				}
-				p[0] = e;
-				//_itoa(e, &p[0], 10);
-				buffOut[k + j * 4] = p[0];
+				temp[l + k * 8] = m[l];
+				//temp[key[l + k * 8]] = m[l];
 			}
-			int huy = 0;
-	}
+		}
+		for (int k = 0; k < 4; k++) {
+			e = 0;
+			for (int h = 0; h < 8; h++) {
+				e += (temp[k * 8 + 7 - h]) * pow(2, h);
+			}
+			p[0] = e;
+			buffOut[k + j * 4] = p[0];
+		}
+	//}
 }
 
 int shifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * f;
 
-	char buff[80], buffOut[80], temp[32];
-
-	srand(time(NULL));
+	char buff[80], buffOut[80];
 
 	//---------------------------------------------------------------
 	// открытие для чтения 
-
+	//srand(time(NULL));
 	//FILE* pq;
 	//if ((pq = fopen(source, "wb")) == NULL) {
 	//	printf("Cannot open file.");
@@ -128,20 +131,16 @@ int shifrator(const char source[], const char drain[]) {
 		return 1;
 	}
 
-	////---------------------------------------------------------------
+	//---------------------------------------------------------------
 
-	//for (int j = 0; j < 32; j++)
-		//buffOut[j] = ' ';
 	strncpy(buffOut, " " , 8);
 	strncpy(buff, "" , 80);
-	fwrite(buffOut, 4, 1, f);
-
 
 	//---------------------------------------------------------------
 
 	int pos1 = ftell(fp);
 
-	while (fread(buff, sizeof buff, 1, fp) != 0) {
+	while (fread(buff, 80, 1, fp) != 0) {
 		pos1 = ftell(fp);
 
 		for (int j = 0; j < 20; j++) {
@@ -149,18 +148,20 @@ int shifrator(const char source[], const char drain[]) {
 			perevod(buff, j, 8, buffOut);
 
 		}
-		strcpy(buff, "");
-		fwrite(buffOut, sizeof buffOut, 1, f);
+		
+		fwrite(buffOut, sizeof buffOut, 1, f); //strcpy(buffOut, buff); 	//fwrite(buff, sizeof buff, 1, f);
+	
 	}
 
 	//---------------------------------------------------------------
 
-	fseek(fp, 0, SEEK_END);                          // устанавливаем позицию в конец файла
-	int pos2 = ftell(fp) - pos1;;                            // получаем размер в байтах
+	fseek(fp, 0, SEEK_END);									// устанавливаем позицию в конец файла
+	int pos2 = ftell(fp) - pos1;;                           // получаем размер в байтах
 	fseek(fp, pos1, SEEK_SET);
-	if (pos2 != 0) {
+	
+	if (pos2 != 0 ) {
 		int a = pos2 % 4, b = pos2 / 4, c = (b + (a == 0 ? 0 : 1)) * 4;
-
+		strcpy(buffOut, buff);
 		fread(buff, pos2, 1, fp);
 		for (int j = 0; j < b; j++) {
 			
@@ -171,7 +172,6 @@ int shifrator(const char source[], const char drain[]) {
 		if (a != 0) {
 
 			perevod(buff, b, a, buffOut);
-			//perevod(buff, b, a, buffOut);
 
 		}
 
@@ -187,7 +187,7 @@ int shifrator(const char source[], const char drain[]) {
 		}
 
 		fseek(f, 0, SEEK_SET);
-		fwrite(buffOut, a, 1, f);
+		//fwrite(buffOut, a, 1, f);
 
 	}
 
@@ -197,10 +197,8 @@ int shifrator(const char source[], const char drain[]) {
 	fseek(f, 0, SEEK_END);
 
 	setlocale(0, "Rus");
-	//printf("\n\nИсходный текст: %d", ftell(fp));
-	//printf("\nЗашифрованный текст: %d", ftell(f));
-
-	
+	printf("\n\nИсходный текст: %d ", ftell(fp));
+	printf("\nЗашифрованный текст: %d \n", ftell(f));
 
 	fclose(fp);
 	fclose(f);
@@ -212,9 +210,8 @@ int deshifrator(const char source[], const char drain[]) {
 
 	FILE* fp, * deshif;
 
-	char buff[80], buffOut[80], temp[32];
-	char plicity = 0;
-
+	char buff[80], buffOut[80], plicity = 0;
+	
 	//---------------------------------------------------------------
 
 	if ((fp = fopen(source, "rb")) == NULL) {
@@ -229,30 +226,47 @@ int deshifrator(const char source[], const char drain[]) {
 
 	//---------------------------------------------------------------
 
-	fread(buffOut, 4, 1, fp);
+	// fread(buffOut, 4, 1, fp);
+	strncpy(buffOut, "", 80);
 	strncpy(buff, "", 80);
-	while (plicity < 4 && buffOut[plicity] != '\0' && buffOut[plicity] != ' ') {
+	/*while (plicity < 4 && buffOut[plicity] != '\0' && buffOut[plicity] != ' ') {
 		plicity++;
-	}
+	}*/
 
 	//---------------------------------------------------------------
 
 	int pos1 = ftell(fp);
-	while (fread(buff, sizeof buff, 1, fp) != 0) {
+	while (fread(buff, 80, 1, fp) != 0) {
 		pos1 = ftell(fp);
-		perevod2(buff, 20, buffOut);
+		//perevod2(buff, 20, buffOut);
 
+		for (int j = 0; j < 20; j++) {
 
-		/*for (int j = 0; j < 10; j++)
-			for (int r = 0; r < 10; r++)
-				buffOut[key[r] - 1 + j * 10] = buff[r + j * 10];
-				*/
+			perevod2(buff, j, 8, buffOut);
+
+		}
+
+		//strcpy(buffOut, buff);
+
 		fseek(fp, 0, SEEK_END);
 		if (ftell(fp) - pos1 > 0)
-			fwrite(buffOut, sizeof buffOut, 1, deshif);
+			fwrite(buffOut, 80, 1, deshif);
 
 		fseek(fp, pos1, SEEK_SET);
 	}
+
+	//while (fread(buff, 80, 1, fp) != 0) {
+	//	pos1 = ftell(fp);
+
+	//	for (int j = 0; j < 20; j++) {
+
+	//		perevod2(buff, j, 8, buffOut);
+
+	//	}
+
+	//	fwrite(buffOut, sizeof buffOut, 1, deshif); //strcpy(buffOut, buff); 	//fwrite(buff, sizeof buff, 1, f);
+
+	//}
 
 	//---------------------------------------------------------------
 
@@ -274,13 +288,23 @@ int deshifrator(const char source[], const char drain[]) {
 	}
 	else if (pos2 == 4 && plicity != 0) {
 
-		perevod2(buff, plicity, buffOut);
+
+		for (int j = 0; j < plicity; j++) {
+
+			perevod2(buff, j, 8, buffOut);
+
+		}
+
+		//perevod2(buff, plicity, buffOut);
 		pos2 = pos2 + plicity - 4;
 		fwrite(buffOut, pos2, 1, deshif);
 
 	}
 	else if (pos2 != 0) {
-		perevod2(buff, pos2/4, buffOut);
+
+		for (int j = 0; j < pos2 / 4; j++) {
+			perevod2(buff, j, plicity, buffOut);
+		}
 		if (plicity != 0)
 			pos2 = pos2 - 4 + plicity;
 		
@@ -293,13 +317,31 @@ int deshifrator(const char source[], const char drain[]) {
 	fseek(deshif, 0, SEEK_END);
 
 	setlocale(0, "Rus");
-	//printf("\nЗашифрованный текст: %d", ftell(fp));
-	//printf("\nРасшифрованный текст: %d", ftell(deshif));
+	printf("\nЗашифрованный текст: %d ", ftell(fp));
+	printf("\nРасшифрованный текст: %d \n", ftell(deshif));
 
 	fclose(fp);
 	fclose(deshif);
 
 	return 0;
+}
+
+void hyi(const char source[]) {
+	FILE* fp;
+	if ((fp = fopen(source, "wb")) == NULL) {
+		printf("Cannot open file.");
+	}
+	char mas[2];
+	for (int a = 0; a < 255; a++) {
+		mas[0] = a;
+		fwrite(mas, 1, 1, fp);
+
+	}
+	
+
+
+	fclose(fp);
+
 }
 
 int main(int argc, char* argv[]) {
@@ -313,16 +355,17 @@ int main(int argc, char* argv[]) {
 		sab += 1;
 		//sab=11;
 		bas = rand() % 9;
-		char mas1[] = {"test-1.exe"};
-		char mas2[] = {"db2.exe"};
-		char mas3[] = {"db3.exe"};
+		char mas1[] = {"111.exe"};
+		char mas2[] = {"db2.txt"};
+		char mas3[] = {"db3.txt"};
 		char mas4[] = {"\n fc  "};
+		//hyi(mas1);
 		shifrator(mas1,mas2);
 		deshifrator(mas2, mas3);
 		strcat(mas4, mas1);
 		strcat(mas4, "  ");
 		strcat(mas4, mas3);
-			if( system("\n fc test-1.exe db3.exe") != 0 )
+			if( system("\n fc 111.exe db3.txt") != 0 )
 			{
 				printf("Залупа!");
 			_getch();
