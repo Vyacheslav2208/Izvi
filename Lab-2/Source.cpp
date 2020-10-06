@@ -9,50 +9,21 @@
 char key[32] = { 24, 6, 25, 31, 27, 19, 2, 26, 11, 3, 18, 30, 7, 5, 10, 16, 1, 17, 28, 20, 12, 0, 23, 4, 29, 13, 8, 14, 22, 9, 21, 15 };
 //char key[32] = { 24, 25, 26, 27, 28, 29, 30, 31,  16, 17, 18, 19, 20, 21, 22, 23,  8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 };
 void perevod(char buff[], int c, int d, int a, bool shif, char buffOut[]) {
-	unsigned char mp[4], res = 0, s = 0;
-	unsigned int m = 0, out = 0, pi = 0;
-	bool h = 0;
+	unsigned int m = 0, out = 0;
 	for (char j = c; j < d; j++) {
 		for (char k = 0; k < 4; k++) {
 			m = m << 8;
-			if (k < a) {
-				_asm {
-					push eax
-					mov eax, m
-
-					pop eax
-
-				}
-				
+			if (k < a) 
 				m = m + (unsigned char)buff[k + j * 4];
-				_asm {
-					push eax
-					mov eax, m
-					mov eax, pi
-					pop eax
-
-				}
-
-			}
-			else {
+			else 
 				m = m + 48;
-				
-			}
-		}
-
-		_asm {
-			push eax
-			mov eax, m
-
-			pop eax
-
 		}
 
 		for (int i = 31; i >= 0; i--) {
 			if (shif) {
-				if (m & (1 << 31 - key[i])) {
+				if (m & (1 << 31 - key[i])) 
 					out |= (1 << 31 - i);
-				}
+				
 			}
 			else {
 				for (char t = 0; t < 32; t++) {
@@ -63,91 +34,16 @@ void perevod(char buff[], int c, int d, int a, bool shif, char buffOut[]) {
 						break;
 					}
 				}
-				_asm {
-					push eax
-					mov eax, out
-
-					pop eax
-
-				}
+				
 			}
 		}
 
-
-
-		_asm {
-			push eax
-			mov eax, out
-
-			pop eax
-
-		}
 		for (char k = 0; k < 4; k++) {
-			/*if (k < a)*/ {
-				_asm {
-					push eax
-					mov eax, out
-
-					pop eax
-
-				}
-
 				buffOut[3 - k + j * 4] = out;
 				out = out >> 8;
-				_asm {
-					push eax
-					mov eax, out
-
-					pop eax
-
-				}
-
-			}
-			/*else {
-				buffOut[3 - k + j * 4] = 48;
-			}*/
 		}
-		//for (char k = 0; k < 4; k++) {
-		//	for (char i = 0; i < 8; i++) {
-	//			res = m & 1;
-		//		if ( res == 0) {
-
-		//			if (shif) {
-
-		//				buffOut[key[i + k * 8] / 8 + j * 4] ^= (1 << (key[i + k * 8] % 8));
-		//				s = i + k * 8;
-		//				s = key[i + k * 8] ;
-		//				s = key[i + k * 8] / 8 + j * 4;
-		//				s = key[i + k * 8] % 8;
-		//			}
-		//			else {
-		//				for (char t = 0; t < 32; t++) {
-		//					if (key[t] == i + k * 8 ) {
-		//						buffOut[k + j * 4] ^= (1 << i);
-		//						h = (m & (1 << t));
-
-		//					}
-		//					h = (m & (1 << t));
-		//				}
-		//			}
-		//		}
-		//		//mp[k] = mp[k] >> 1;
-		//		m = m >> 1;
-		//	}
-		//}
-
 	}
 }
-
-/*
-for (char l = 0; l < 8; l++)
-	if (shif)
-		temp[key[l + k * 8]] = m[l];
-	else
-		for (char i = 0; i < 32; i++)
-			if (key[i] == l + k * 8)
-				temp[i] = m[l];
-*/
 
 int shifrator(const char source[], const char drain[]) {
 
@@ -181,18 +77,12 @@ int shifrator(const char source[], const char drain[]) {
 	while (fread(buff, 80, 1, fp) != 0) {
 		pos1 = ftell(fp);
 
-		for (int l = 0; l < 80; l++) {
-			buffOut[l] = 255;
-		}
 		perevod(buff, 0, 20, 8, true, buffOut);
 
 		fwrite(buffOut, sizeof buffOut, 1, f);
 	}
 
 	//---------------------------------------------------------------
-	for (int l = 0; l < 80; l++) {
-		buffOut[l] = 255;
-	}
 
 	fseek(fp, 0, SEEK_END);
 	int pos2 = ftell(fp) - pos1;;
@@ -203,10 +93,6 @@ int shifrator(const char source[], const char drain[]) {
 
 		strncpy(buffOut, "", 80);
 		fread(buff, pos2, 1, fp);
-
-		for (int l = 0; l < 80; l++) {
-			buffOut[l] = 255;
-		}
 
 		perevod(buff, 0, b, 8, true, buffOut);
 
@@ -276,9 +162,6 @@ int deshifrator(const char source[], const char drain[]) {
 	while (fread(buff, 80, 1, fp) != 0) {
 		pos1 = ftell(fp);
 
-		for (int l = 0; l < 80; l++) {
-			buffOut[l] = 255;
-		}
 		perevod(buff, 0, 20, 8, false, buffOut);
 
 		fseek(fp, 0, SEEK_END);
@@ -295,10 +178,6 @@ int deshifrator(const char source[], const char drain[]) {
 	int pos2 = ftell(fp) - pos1;                            // получаем размер в байтах
 
 	fseek(fp, pos1, SEEK_SET);
-
-	for (int l = 0; l < 80; l++) {
-		buffOut[l] = 255;
-	}
 
 	if (pos2 == 0) {
 		if (plicity != 0) {
@@ -342,42 +221,27 @@ int deshifrator(const char source[], const char drain[]) {
 }
 
 
-void hyi(const char source[]) {
-	FILE* fp;
-	if ((fp = fopen(source, "wb")) == NULL) {
-		printf("Cannot open file.");
-	}
-	char mas[2];
-	for (int a = 1; a < 9; a++) {
-		mas[0] = a + 48;
-		fwrite(mas, 1, 1, fp);
 
-	}
-	fclose(fp);
-
-}
 
 int main(int argc, char* argv[]) {
 
 	setlocale(0, "Rus");
 
-	char mas1[] = { "444.exe" };
-	char mas2[] = { "db2.exe" };
-	char mas3[] = { "db3.exe" };
-	//hyi(mas1);
-	shifrator(mas1, mas2);
-	deshifrator(mas2, mas3);
-	system("\n fc 444.exe db3.exe");
+	//char mas1[] = { "444.exe" };
+	//char mas2[] = { "db2.exe" };
+	//char mas3[] = { "db3.exe" };
+	
+	//system("\n fc 444.exe db3.exe");
 
 
 
-	//int d = atoi(argv[1]);
-	//if (d == 0) {
-	//	shifrator(argv[2], argv[3]);
-	//}
-	//else if (d == 1) {
-	//	//deshifrator(argv[2], argv[3]);
-	//}
+	int d = atoi(argv[1]);
+	if (d == 0) {
+		shifrator(argv[2], argv[3]);
+	}
+	else if (d == 1) {
+		deshifrator(argv[2], argv[3]);
+	}
 
 	_getch();
 	return 0;
