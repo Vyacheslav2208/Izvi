@@ -6,15 +6,17 @@
 #include <time.h>
 #include <math.h>
 
-char key[32] = { 24, 6, 25, 31, 27, 19, 2, 26, 11, 3, 18, 30, 7, 5, 10, 16, 1, 17, 28, 20, 12, 0, 23, 4, 29, 13, 8, 14, 22, 9, 21, 15 };
+char key[32] = { 24, 10, 2, 8, 21, 26, 28, 0, 18, 12, 11, 25, 5, 22, 1, 16, 3, 9, 13, 4, 19, 17, 6, 15, 14, 20, 7, 23, 30, 31, 27, 29 };
+//char key[32] = { 24, 6, 25, 31, 27, 19, 2, 26, 11, 3, 18, 30, 7, 5, 10, 16, 1, 17, 28, 20, 12, 0, 23, 4, 29, 13, 8, 14, 22, 9, 21, 15 };
 //char key[32] = { 24, 25, 26, 27, 28, 29, 30, 31,  16, 17, 18, 19, 20, 21, 22, 23,  8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7 };
 void perevod(char buff[], int c, int d, int a, bool shif, char buffOut[]) {
 	unsigned int m = 0, out = 0;
 	for (char j = c; j < d; j++) {
 		for (char k = 0; k < 4; k++) {
 			m = m << 8;
-			if (k < a) 
+			if (k < a) {
 				m = m + (unsigned char)buff[k + j * 4];
+			}
 			else 
 				m = m + 48;
 		}
@@ -227,11 +229,11 @@ int main(int argc, char* argv[]) {
 
 	setlocale(0, "Rus");
 
-	//char mas1[] = { "444.exe" };
+	//char mas1[] = { "mi.txt" };
 	//char mas2[] = { "db2.exe" };
 	//char mas3[] = { "db3.exe" };
-	
-	//system("\n fc 444.exe db3.exe");
+	//
+	//system("\n fc mi.txt db3.exe");
 
 
 
