@@ -5,10 +5,6 @@
 #include <iostream>
 #include <accctrl.h>
 #include <aclapi.h>
-//	SECURITY_ATTRIBUTES sa;
-//	PSID pSID;
-//	PSID pSIDAdmin;
-//	PACL pACL;
 
 void main()
 {
@@ -93,7 +89,7 @@ void main()
 	}
 
 	wprintf(L"RegCreateKeyEx result %u\n",
-		RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\test1", 0, mus,
+		RegCreateKeyEx(HKEY_CURRENT_USER, L"SOFTWARE\\pi", 0, mus,
 			REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, &sa, &hkSub, &dwRes));
 
 	if (hkSub) {
